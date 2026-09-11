@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}MedFusion AI — {{ t.portal_title if t else "Patient Portal" }}{% endblock %}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
+</head>
+<body>
+    <div class="navbar">
+        <h1>❤️ MedFusion AI — {{ t.portal_title if t else "Patient Portal" }}</h1>
+        <div class="navbar-controls">
+            <select class="lang-select" onchange="window.location.href='/patient/set-language/' + this.value">
+                <option value="en" {% if lang == "en" %}selected{% endif %}>English</option>
+                <option value="hi" {% if lang == "hi" %}selected{% endif %}>हिन्दी</option>
+                <option value="mr" {% if lang == "mr" %}selected{% endif %}>मराठी</option>
+            </select>
+            <a class="logout-btn" href="/patient/logout">{{ t.logout if t else "Log out" }}</a>
+        </div>
+    </div>
+    <div class="container">
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

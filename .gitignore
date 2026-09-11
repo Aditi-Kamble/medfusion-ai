@@ -1,0 +1,22 @@
+# Virtual environment
+venv/
+__pycache__/
+*.pyc
+
+# Database
+medfusion.db
+
+# Uploaded files (user data, shouldn't be in version control)
+backend/app/uploaded_ecgs/
+reports/*.pdf
+
+# Environment secrets (if you add a .env later)
+.env
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

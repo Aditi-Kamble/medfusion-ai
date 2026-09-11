@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Add New Patient</h2>
+    <form method="post" action="/ui/patients/new">
+        <input type="hidden" name="doctor_id" value="{{ doctor_id }}">
+        <label>Full Name</label>
+        <input type="text" name="name" required>
+        <label>Age</label>
+        <input type="number" name="age" required>
+        <label>Date of Birth</label>
+        <input type="date" name="date_of_birth" required>
+        <label>Sex</label>
+        <select name="sex" required>
+            <option value="1">Male</option>
+            <option value="0">Female</option>
+        </select>
+        <button class="btn" type="submit">Add Patient</button>
+    </form>
+</div>
+{% endblock %}

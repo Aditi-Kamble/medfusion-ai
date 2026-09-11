@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Welcome, Dr. {{ doctor.name }}</h2>
+    <a class="btn" href="/ui/patients/new">+ Add New Patient</a>
+    <a class="btn btn-secondary" href="/ui/export/patients.csv">⬇ Export All Patients (CSV)</a>
+</div>
+
+<div class="card">
+    <h2>Overview</h2>
+    <div style="display:flex; gap:20px; flex-wrap:wrap;">
+        <div style="flex:1; min-width:100px;">
+            <div style="font-size:26px; font-weight:700; color:#1a3b5d;">{{ analytics.total }}</div>
+            <div style="font-size:13px; color:#6b7c8f;">Total Patients</div>
+        </div>
+        <div style="flex:1; min-width:100px;">
+            <div style="font-size:26px; font-weight:700; color:#c0392b;">{{ analytics.high }}</div>
+            <div style="font-size:13px; color:#6b7c8f;">High Risk</div>
+        </div>
+        <div style="flex:1; min-width:100px;">
+            <div style="font-size:26px; font-weight:700; color:#b8860b;">{{ analytics.moderate }}</div>
+            <div style="font-size:13px; color:#6b7c8f;">Moderate Risk</div>
+        </div>
+        <div style="flex:1; min-width:100px;">
+            <div style="font-size:26px; font-weight:700; color:#1e7e34;">{{ analytics.low }}</div>
+            <div style="font-size:13px; color:#6b7c8f;">Low Risk</div>
+        </div>
+        <div style="flex:1; min-width:100px;">
+            <div style="font-size:26px; font-weight:700; color:#8a97a5;">{{ analytics.unassessed }}</div>
+            <div style="font-size:13px; color:#6b7c8f;">Not Yet Assessed</div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <h2>Your Patients</h2>
+
+    <div style="display:flex; gap:10px; margin-bottom:14px;">
+        <input type="text" id="searchBox" placeholder="Search by name or code..."
+               style="flex:1; padding:9px 12px; border:1px solid #ccd6e0; border-radius:5px; font-size:14px;"
+               onkeyup="filterPatients()">
+        <select id="riskFilter" onchange="filterPatients()"
+                style="padding:9px 12px; border:1px solid #ccd6e0; border-radius:5px; font-size:14px;">
+            <option value="">All Risk Levels</option>
+            <option value="HIGH">High</option>
+            <option value="MODERATE">Moderate</option>
+            <option value="LOW">Low</option>
+            <option value="None">Not Yet Assessed</option>
+        </select>
+    </div>
+
+    {% if patient_rows %}
+    <table id="patientsTable">
+        <tr><th>Name</th><th>Age</th><th>Sex</th><th>Patient Code</th><th>Latest Risk</th><th>Actions</th></tr>
+        {% for row in patient_rows %}
+        <tr data-name="{{ row.patient.name|lower }}" data-code="{{ row.patient.patient_code|lower }}" data-risk="{{ row.latest_risk or 'None' }}">
+            <td>{{ row.patient.name }}</td>
+            <td>{{ row.patient.age }}</td>
+            <td>{{ "Male" if row.patient.sex == 1 else "Female" }}</td>
+            <td><strong>{{ row.patient.patient_code }}</strong></td>
+            <td>
+                {% if row.latest_risk %}
+                <span class="risk-badge risk-{{ row.latest_risk }}">{{ row.latest_risk }}</span>
+                {% else %}
+                <span style="color:#8a97a5; font-size:13px;">Not assessed</span>
+                {% endif %}
+            </td>
+            <td>
+                <a href="/ui/assess/new?patient_id={{ row.patient.id }}">New Assessment</a> &nbsp;|&nbsp;
+                <a href="/ui/patients/{{ row.patient.id }}/history">History</a> &nbsp;|&nbsp;
+                <a href="/ui/patients/{{ row.patient.id }}/edit">Edit</a> &nbsp;|&nbsp;
+                <form method="post" action="/ui/patients/{{ row.patient.id }}/delete" style="display:inline;"
+                      onsubmit="return confirm('Delete this patient and all their assessment history? This cannot be undone.');">
+                    <button type="submit" style="background:none; border:none; color:#c0392b; cursor:pointer; padding:0; font-size:14px; text-decoration:underline;">Delete</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p style="margin-top:14px; font-size:13px; color:#8a97a5;">
+        Share the Patient Code and Date of Birth with your patient — they'll use it to view their own report at the Patient Portal.
+    </p>
+    {% else %}
+    <p class="empty-state">No patients yet. Add your first patient above.</p>
+    {% endif %}
+</div>
+
+<script>
+function filterPatients() {
+    const search = document.getElementById('searchBox').value.toLowerCase();
+    const risk = document.getElementById('riskFilter').value;
+    const rows = document.querySelectorAll('#patientsTable tr[data-name]');
+
+    rows.forEach(function(row) {
+        const nameMatch = row.dataset.name.includes(search) || row.dataset.code.includes(search);
+        const riskMatch = !risk || row.dataset.risk === risk;
+        row.style.display = (nameMatch && riskMatch) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Edit Patient — {{ patient.name }}</h2>
+    <form method="post" action="/ui/patients/{{ patient.id }}/edit">
+        <label>Full Name</label>
+        <input type="text" name="name" value="{{ patient.name }}" required>
+        <label>Age</label>
+        <input type="number" name="age" value="{{ patient.age }}" required>
+        <label>Date of Birth</label>
+        <input type="date" name="date_of_birth" value="{{ patient.date_of_birth }}" required>
+        <label>Sex</label>
+        <select name="sex" required>
+            <option value="1" {% if patient.sex == 1 %}selected{% endif %}>Male</option>
+            <option value="0" {% if patient.sex == 0 %}selected{% endif %}>Female</option>
+        </select>
+        <button class="btn" type="submit">Save Changes</button>
+    </form>
+</div>
+{% endblock %}

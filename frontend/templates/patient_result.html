@@ -1,0 +1,55 @@
+{% extends "patient_base.html" %}
+{% block content %}
+<div class="card">
+    <h2>{{ t.report_heading }}</h2>
+    <p style="margin-bottom:10px; color:#6b7c8f; font-size:14px;">
+        {{ t.assessed_on }} {{ assessment.created_at.strftime("%d %B %Y") }}
+    </p>
+
+    <span class="risk-badge risk-{{ assessment.risk_label }}">
+        {{ t["risk_label_" ~ assessment.risk_label] }} — {{ assessment.final_risk_score }}%
+    </span>
+
+    <p style="font-size:15px; line-height:1.7; margin-top:20px;">{{ simple_message }}</p>
+    {% if trend_message %}
+    <div style="background:#e8f4fd; border-radius:6px; padding:14px 16px; margin-top:16px;">
+        <p style="font-size:14px; color:#1a3b5d; margin:0;">📈 {{ trend_message }}</p>
+    </div>
+    {% endif %}
+
+    {% if increasing_factors %}
+    <h2 style="margin-top:24px;">{{ t.contributed_heading }}</h2>
+    <p style="font-size:14px; line-height:1.7; color:#3b4a5a;">
+        {{ increasing_factors|join(", ") }}.
+        {% if decreasing_factors %}
+        {{ t.positive_side }} {{ decreasing_factors|join(", ") }} {{ t.helped_lower }}
+        {% endif %}
+    </p>
+    {% endif %}
+
+    {% if tips %}
+    <h2 style="margin-top:24px;">{{ t.what_you_can_do }}</h2>
+    <ul style="font-size:14px; line-height:1.9; color:#3b4a5a; padding-left:20px;">
+        {% for tip in tips %}
+        <li>{{ tip }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    {% if assessment.risk_label in ["MODERATE", "HIGH"] %}
+    <div style="background:#fdf3d9; border-radius:6px; padding:16px; margin-top:20px;">
+        <p style="font-weight:600; color:#b8860b; margin-bottom:6px;">📋 {{ t.next_step }}</p>
+        <p style="font-size:14px; color:#3b4a5a;">
+            {{ t.next_step_text }}
+        </p>
+    </div>
+    {% endif %}
+
+    <p style="font-size:12px; color:#8a97a5; margin-top:24px;">
+        {{ t.disclaimer }}
+    </p>
+
+    <a class="btn" style="margin-top:20px;" href="/patient/assessment/{{ assessment.id }}/report">{{ t.download_pdf }}</a>
+    <a class="btn btn-secondary" style="margin-top:20px;" href="/patient/dashboard">{{ t.back_to_reports }}</a>
+</div>
+{% endblock %}

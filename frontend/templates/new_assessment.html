@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>New Risk Assessment — {{ patient.name }}</h2>
+        {% if errors %}
+    <div style="background:#fde2e2; border-radius:6px; padding:12px 16px; margin-bottom:16px;">
+        {% for e in errors %}
+        <p style="color:#c0392b; font-size:14px; margin:2px 0;">{{ e }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+    <form method="post" action="/ui/assess/new" enctype="multipart/form-data">
+        <input type="hidden" name="patient_id" value="{{ patient.id }}">
+        <input type="hidden" name="age" value="{{ patient.age }}">
+        <input type="hidden" name="sex" value="{{ patient.sex }}">
+
+        <label>Chest Pain Type (0-3)</label>
+        <input type="number" name="cp" min="0" max="3" required>
+
+        <label>Resting Blood Pressure (mm Hg)</label>
+        <input type="number" name="trestbps" min="50" max="250" required>
+
+        <label>Cholesterol (mg/dL)</label>
+        <input type="number" name="chol" min="50" max="700" required>
+
+        <label>Fasting Blood Sugar &gt; 120 mg/dL?</label>
+        <select name="fbs" required>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select>
+
+        <label>Resting ECG Result (0-2)</label>
+        <input type="number" name="restecg" min="0" max="2" required>
+
+        <label>Max Heart Rate Achieved</label>
+        <input type="number" name="thalach" min="40" max="250" required>
+
+        <label>Exercise-Induced Angina?</label>
+        <select name="exang" required>
+            <option value="1">Yes</option>
+            <option value="0">No</option>
+        </select>
+
+        <label>ST Depression (oldpeak)</label>
+        <input type="number" step="0.1" name="oldpeak" required>
+
+        <label>Slope of Peak Exercise ST (0-2)</label>
+        <input type="number" name="slope" min="0" max="2" required>
+
+        <label>Number of Major Vessels (0-4)</label>
+        <input type="number" name="ca" min="0" max="4" required>
+
+        <label>Thalassemia (0-3)</label>
+        <input type="number" name="thal" min="0" max="3" required>
+
+        <label>Doctor's Notes (optional)</label>
+        <textarea name="doctor_notes" rows="3" style="width:100%; padding:9px 12px; border:1px solid #ccd6e0; border-radius:5px; font-size:14px; font-family:inherit;" placeholder="e.g. Patient reports family history of MI — advising cardiology referral"></textarea>
+        
+        <label>Upload ECG Image</label>
+        <input type="file" name="ecg_image" accept="image/*" required>
+
+        <button class="btn" type="submit" id="submitBtn">Run Risk Assessment</button>
+        <p id="loadingText" style="display:none; margin-top:12px; color:#1a3b5d; font-weight:600;">
+            ⏳ Analyzing clinical data and ECG — this takes a few seconds...
+        </p>
+    </form>
+
+    <script>
+        document.querySelector('form').addEventListener('submit', function() {
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').textContent = 'Analyzing...';
+            document.getElementById('loadingText').style.display = 'block';
+        });
+    </script>
+        
+
+    </form>
+</div>
+{% endblock %}

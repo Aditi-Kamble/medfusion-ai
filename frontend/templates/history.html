@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Assessment History — {{ patient.name }}</h2>
+
+    {% if chart_scores|length > 1 %}
+    <canvas id="riskChart" height="80"></canvas>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+    <script>
+        const ctx = document.getElementById('riskChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: {{ chart_labels|tojson }},
+                datasets: [{
+                    label: 'Risk Score (%)',
+                    data: {{ chart_scores|tojson }},
+                    borderColor: '#1a3b5d',
+                    backgroundColor: 'rgba(26, 59, 93, 0.1)',
+                    tension: 0.3,
+                    fill: true,
+                }]
+            },
+            options: {
+                scales: { y: { beginAtZero: true, max: 100 } },
+                plugins: { legend: { display: false } }
+            }
+        });
+    </script>
+    {% endif %}
+
+    {% if assessments %}
+    <table style="margin-top:20px;">
+        <tr><th>Date</th><th>Risk Score</th><th>Label</th><th>Doctor Notes</th></tr>
+        {% for a in assessments %}
+        <tr>
+            <td>{{ a.created_at.strftime("%d %b %Y, %I:%M %p") }}</td>
+            <td>{{ a.final_risk_score }}%</td>
+            <td><span class="risk-badge risk-{{ a.risk_label }}">{{ a.risk_label }}</span></td>
+            <td style="font-size:13px; color:#6b7c8f;">{{ a.doctor_notes or "—" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="empty-state">No assessments yet for this patient.</p>
+    {% endif %}
+    <a class="btn btn-secondary" href="/ui/assess/new?patient_id={{ patient.id }}">New Assessment</a>
+</div>
+{% endblock %}

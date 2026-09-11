@@ -1,0 +1,25 @@
+{% extends "patient_base.html" %}
+{% block content %}
+<div class="card">
+    <h2>{{ t.hello }}, {{ patient.name }}</h2>
+    <p style="color:#6b7c8f; font-size:14px;">{{ t.history_intro }}</p>
+</div>
+
+<div class="card">
+    <h2>{{ t.assessments_heading }}</h2>
+    {% if assessments %}
+    <table>
+        <tr><th>{{ t.date_col }}</th><th>{{ t.risk_col }}</th><th></th></tr>
+        {% for a in assessments %}
+        <tr>
+            <td>{{ a.created_at.strftime("%d %b %Y") }}</td>
+            <td><span class="risk-badge risk-{{ a.risk_label }}">{{ t["risk_label_" ~ a.risk_label] }}</span></td>
+            <td><a href="/patient/assessment/{{ a.id }}">{{ t.view_details }}</a></td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="empty-state">{{ t.no_assessments }}</p>
+    {% endif %}
+</div>
+{% endblock %}

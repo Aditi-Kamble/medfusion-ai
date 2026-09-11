@@ -1,0 +1,12 @@
+Per-Class Performance — ECG Model
+
+                    precision    recall  f1-score   support
+
+            Normal      0.704     1.000     0.826        57
+Abnormal_Heartbeat      0.898     0.936     0.917        47
+     History_of_MI      1.000     0.235     0.381        34
+                MI      0.917     0.917     0.917        48
+
+          accuracy                          0.823       186
+         macro avg      0.880     0.772     0.760       186
+      weighted avg      0.862     0.823     0.791       186
