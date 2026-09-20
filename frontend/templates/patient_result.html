@@ -3,7 +3,7 @@
 <div class="card">
     <h2>{{ t.report_heading }}</h2>
     <p style="margin-bottom:10px; color:#6b7c8f; font-size:14px;">
-        {{ t.assessed_on }} {{ assessment.created_at.strftime("%d %B %Y") }}
+        {{ t.assessed_on }} {{ assessment.created_at.strftime("%d %B %Y") }} — Dr. {{ patient.doctor.name }}
     </p>
 
     <span class="risk-badge risk-{{ assessment.risk_label }}">

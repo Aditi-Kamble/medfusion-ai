@@ -2,17 +2,31 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}MedFusion AI{% endblock %}</title>
+    <title>{% block title %}MedFusion{% endblock %}</title>
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❤️</text></svg>">
 </head>
 <body>
     <div class="navbar">
-        <h1>❤️ MedFusion AI</h1>
-        <a href="/ui/logout">Switch Doctor / Logout</a>
+        <h1>❤️ MedFusion</h1>
+        <div>
+            <button class="theme-toggle-btn" onclick="toggleTheme()">🌙 Dark Mode</button>
+            <a href="/ui/profile" style="margin-right:16px;">My Profile</a>
+            <a href="/ui/audit-log" style="margin-right:16px;">Access Log</a>
+            <a href="/ui/logout">Switch Doctor / Logout</a>
+        </div>
     </div>
     <div class="container">
         {% block content %}{% endblock %}
     </div>
+    <script>
+        function toggleTheme() {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('medfusion-theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+        }
+        if (localStorage.getItem('medfusion-theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+        }
+    </script>
 </body>
 </html>

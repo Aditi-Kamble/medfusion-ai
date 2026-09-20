@@ -1,8 +1,8 @@
-# MedFusion AI
+# MedFusion 
 
 **Multi-Modal Deep Learning System for Early Heart Disease Risk Prediction**
 
-MedFusion AI is a clinical decision-support prototype that combines patient
+MedFusion is a clinical decision-support prototype that combines patient
 clinical data and ECG imaging through two independently trained deep learning
 models, fusing their outputs at inference time to estimate heart disease risk
 — complete with explainable AI (SHAP + Grad-CAM), a doctor-facing web app,

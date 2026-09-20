@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Create Doctor Account</h2>
+    {% if error %}
+    <p style="color:#c0392b; font-size:14px; margin-top:8px;">{{ error }}</p>
+    {% endif %}
+    <form method="post" action="/ui/register">
+        <label>Full Name</label>
+        <input type="text" name="name" required>
+        <label>Email</label>
+        <input type="email" name="email" required>
+        <label>Password</label>
+        <input type="password" name="password" required>
+        <label>Security Question</label>
+        <select name="security_question" required>
+            <option value="">Select a question</option>
+            <option value="What is your favorite childhood teacher's name?">What is your favorite childhood teacher's name?</option>
+            <option value="What was the name of your first pet?">What was the name of your first pet?</option>
+            <option value="What is your mother's maiden name?">What is your mother's maiden name?</option>
+            <option value="What city were you born in?">What city were you born in?</option>
+            <option value="What was the name of your first school?">What was the name of your first school?</option>
+            <option value="What is your favorite book?">What is your favorite book?</option>
+        </select>
+        <label>Your Answer</label>
+        <input type="text" name="security_answer" required>
+        <button class="btn" type="submit">Create Account</button>
+    </form>
+    <p style="margin-top:16px; font-size:13px; text-align:center;">
+        Already have an account? <a href="/ui/login">Log in</a>
+    </p>
+</div>
+{% endblock %}

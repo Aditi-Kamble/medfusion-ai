@@ -126,3 +126,33 @@ th { color: #6b7c8f; font-weight: 600; }
 .logout-btn:hover {
     background: #a5301f;
 }
+
+body.dark-mode {
+    background: #12181f;
+    color: #d8e0e8;
+}
+body.dark-mode .card {
+    background: #1c2530;
+    box-shadow: none;
+    border: 1px solid #2a3644;
+}
+body.dark-mode .navbar { background: #0d1218; }
+body.dark-mode form input, body.dark-mode form select, body.dark-mode textarea {
+    background: #12181f;
+    border-color: #2a3644;
+    color: #d8e0e8;
+}
+body.dark-mode table th { color: #8a97a5; }
+body.dark-mode td, body.dark-mode th { border-color: #2a3644; }
+body.dark-mode .empty-state { color: #6b7c8f; }
+
+.theme-toggle-btn {
+    background: none;
+    border: 1px solid #cfe3f5;
+    color: #cfe3f5;
+    border-radius: 5px;
+    padding: 6px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    margin-right: 14px;
+}

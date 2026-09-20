@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Your Profile</h2>
+    {% if saved %}
+    <p style="color:#1e7e34; font-size:14px; margin-bottom:10px;">Profile updated successfully.</p>
+    {% endif %}
+    <form method="post" action="/ui/profile">
+        <label>Full Name</label>
+        <input type="text" name="name" value="{{ doctor.name }}" required>
+        <label>Specialization</label>
+        <input type="text" name="specialization" value="{{ doctor.specialization or '' }}" placeholder="e.g. Cardiologist, General Physician">
+        <label>Clinic / Hospital Name</label>
+        <input type="text" name="clinic_name" value="{{ doctor.clinic_name or '' }}" placeholder="e.g. City Heart Care Clinic">
+        <button class="btn" type="submit">Save Profile</button>
+    </form>
+    <p style="margin-top:14px; font-size:13px; color:#8a97a5;">
+        This information appears on every PDF report you generate, giving it a more official, clinic-branded look.
+    </p>
+</div>
+<a class="btn btn-secondary" style="margin-top:16px;" href="/ui/dashboard">← Back to Dashboard</a>
+</div>
+{% endblock %}

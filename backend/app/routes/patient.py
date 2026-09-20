@@ -164,7 +164,7 @@ def patient_assessment_detail(assessment_id: int, request: Request, db: Session 
 
     # Short plain-text summary (for SMS/WhatsApp/copy)
     short_summary = (
-        f"MedFusion AI Report for {patient.name} "
+        f"MedFusion Report for {patient.name} "
         f"({assessment.created_at.strftime('%d %b %Y')}): "
         f"Risk Level {t['risk_label_' + assessment.risk_label]} "
         f"({assessment.final_risk_score}%). "

@@ -20,7 +20,7 @@ from backend.app.routes.patient import router as patient_router
 # Create all tables on startup (safe to call repeatedly — no-op if they exist)
 Base.metadata.create_all(bind=engine)
 
-app = FastAPI(title="MedFusion AI", description="Multi-Modal Heart Disease Risk Prediction")
+app = FastAPI(title="MedFusion", description="Multi-Modal Heart Disease Risk Prediction")
 
 app.add_middleware(
     CORSMiddleware,
@@ -52,7 +52,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @app.get("/")
 def root():
-    return {"message": "MedFusion AI backend is running"}
+    return {"message": "MedFusion backend is running"}
 
 
 @app.post("/doctors")

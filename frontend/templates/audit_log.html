@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card">
+    <h2>Access Log</h2>
+    <p style="color:#6b7c8f; font-size:14px; margin-bottom:14px;">
+        A record of your recent activity on patient data — demonstrates traceability, a standard requirement in real clinical software.
+    </p>
+    {% if logs %}
+    <table>
+        <tr><th>Time</th><th>Action</th><th>Patient</th></tr>
+        {% for log in logs %}
+        <tr>
+            <td>{{ log.timestamp.strftime("%d %b %Y, %I:%M %p") }}</td>
+            <td>{{ log.action }}</td>
+            <td>{{ log.patient.name if log.patient else "—" }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p class="empty-state">No activity recorded yet.</p>
+    {% endif %}
+</div>
+<a class="btn btn-secondary" style="margin-top:16px;" href="/ui/dashboard">← Back to Dashboard</a>
+</div>
+{% endblock %}

@@ -16,6 +16,10 @@ class Doctor(Base):
     name = Column(String, nullable=False)
     email = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
+    security_question = Column(String, nullable=True)
+    security_answer = Column(String, nullable=True)
+    specialization = Column(String, nullable=True)
+    clinic_name = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
 
     patients = relationship("Patient", back_populates="doctor")
@@ -68,3 +72,14 @@ class Assessment(Base):
     doctor_notes = Column(String, nullable=True)
 
     patient = relationship("Patient", back_populates="assessments")
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    doctor_id = Column(Integer, ForeignKey("doctors.id"))
+    patient_id = Column(Integer, ForeignKey("patients.id"), nullable=True)
+    action = Column(String, nullable=False)
+    timestamp = Column(DateTime, default=datetime.utcnow)  
+
+    patient = relationship("Patient")  

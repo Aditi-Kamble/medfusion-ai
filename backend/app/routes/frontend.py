@@ -16,6 +16,7 @@ from backend.app.database import get_db
 from backend.app.models_db import Doctor, Patient, Assessment
 from backend.app.utils.fusion import MedFusionInference
 from backend.app.utils.pdf_report import generate_pdf_report
+from backend.app.models_db import AuditLog
 
 router = APIRouter(prefix="/ui")
 templates = Jinja2Templates(directory="frontend/templates")
@@ -39,25 +40,89 @@ def login_page(request: Request):
     return templates.TemplateResponse(request, "login.html", {})
 
 
-@router.post("/login")
-def login_submit(request: Request, name: str = Form(...), email: str = Form(...),
-                  password: str = Form(...), db: Session = Depends(get_db)):
-    doctor = db.query(Doctor).filter(Doctor.email == email).first()
-    if not doctor:
-        hashed = pwd_context.hash(password)
-        doctor = Doctor(name=name, email=email, hashed_password=hashed)
-        db.add(doctor)
-        db.commit()
-        db.refresh(doctor)
-    else:
-        if not pwd_context.verify(password, doctor.hashed_password):
-            return templates.TemplateResponse(
-                request, "login.html", {"error": "Incorrect password. Try again."}
-            )
+@router.get("/register")
+def register_page(request: Request):
+    return templates.TemplateResponse(request, "register.html", {})
+
+
+@router.post("/register")
+def register_submit(request: Request, name: str = Form(...), email: str = Form(...),
+                     password: str = Form(...), security_question: str = Form(...),
+                     security_answer: str = Form(...), db: Session = Depends(get_db)):
+    existing = db.query(Doctor).filter(Doctor.email == email).first()
+    if existing:
+        return templates.TemplateResponse(
+            request, "register.html",
+            {"error": "An account with this email already exists. Please log in instead."}
+        )
+
+    hashed = pwd_context.hash(password)
+    doctor = Doctor(
+        name=name, email=email, hashed_password=hashed,
+        security_question=security_question,
+        security_answer=security_answer.strip().lower(),
+    )
+    db.add(doctor)
+    db.commit()
+    db.refresh(doctor)
 
     request.session["doctor_id"] = doctor.id
     return RedirectResponse(url="/ui/dashboard", status_code=303)
 
+
+@router.post("/login")
+def login_submit(request: Request, email: str = Form(...), password: str = Form(...),
+                  db: Session = Depends(get_db)):
+    doctor = db.query(Doctor).filter(Doctor.email == email).first()
+
+    if not doctor:
+        return templates.TemplateResponse(
+            request, "login.html", {"error": "No account found with that email. Please register first."}
+        )
+
+    if not pwd_context.verify(password, doctor.hashed_password):
+        return templates.TemplateResponse(
+            request, "login.html", {"error": "Incorrect password. Try again."}
+        )
+
+    request.session["doctor_id"] = doctor.id
+    return RedirectResponse(url="/ui/dashboard", status_code=303)
+
+@router.get("/forgot-password")
+def forgot_password_page(request: Request, email: str = None, db: Session = Depends(get_db)):
+    if not email:
+        return templates.TemplateResponse(request, "forgot_password.html", {"step": "email"})
+
+    doctor = db.query(Doctor).filter(Doctor.email == email).first()
+    if not doctor or not doctor.security_question:
+        return templates.TemplateResponse(
+            request, "forgot_password.html",
+            {"step": "email", "error": "No account with a security question found for that email."}
+        )
+
+    return templates.TemplateResponse(
+        request, "forgot_password.html",
+        {"step": "answer", "email": email, "question": doctor.security_question}
+    )
+
+
+@router.post("/forgot-password")
+def forgot_password_submit(request: Request, email: str = Form(...),
+                            security_answer: str = Form(...), new_password: str = Form(...),
+                            db: Session = Depends(get_db)):
+    doctor = db.query(Doctor).filter(Doctor.email == email).first()
+
+    if not doctor or (doctor.security_answer or "") != security_answer.strip().lower():
+        return templates.TemplateResponse(
+            request, "forgot_password.html",
+            {"step": "answer", "email": email, "question": doctor.security_question if doctor else "",
+             "error": "That answer doesn't match. Try again."}
+        )
+
+    doctor.hashed_password = pwd_context.hash(new_password)
+    db.commit()
+
+    return templates.TemplateResponse(request, "login.html", {"error": "Password reset successful. Please log in with your new password."})
 
 @router.get("/logout")
 def logout(request: Request):
@@ -99,6 +164,30 @@ def dashboard(request: Request, db: Session = Depends(get_db)):
         request, "dashboard.html",
         {"doctor": doctor, "patient_rows": patient_rows, "analytics": analytics}
     )
+
+
+@router.get("/profile")
+def doctor_profile_page(request: Request, db: Session = Depends(get_db)):
+    doctor = get_current_doctor(request, db)
+    if not doctor:
+        return RedirectResponse(url="/ui/login", status_code=303)
+    return templates.TemplateResponse(request, "doctor_profile.html", {"doctor": doctor})
+
+
+@router.post("/profile")
+def doctor_profile_submit(request: Request, name: str = Form(...),
+                           specialization: str = Form(""), clinic_name: str = Form(""),
+                           db: Session = Depends(get_db)):
+    doctor = get_current_doctor(request, db)
+    if not doctor:
+        return RedirectResponse(url="/ui/login", status_code=303)
+
+    doctor.name = name
+    doctor.specialization = specialization.strip() or None
+    doctor.clinic_name = clinic_name.strip() or None
+    db.commit()
+
+    return templates.TemplateResponse(request, "doctor_profile.html", {"doctor": doctor, "saved": True})
 
 
 @router.get("/export/patients.csv")
@@ -163,6 +252,11 @@ def new_patient_page(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse(
         request, "new_patient.html", {"doctor_id": doctor.id}
     )
+
+def log_action(db: Session, doctor_id: int, action: str, patient_id: int = None):
+    entry = AuditLog(doctor_id=doctor_id, patient_id=patient_id, action=action)
+    db.add(entry)
+    db.commit()
 
 
 @router.post("/patients/new")
@@ -307,6 +401,8 @@ def new_assessment_submit(
             {"patient": patient, "errors": validation_errors}
         )
 
+    log_action(db, doctor.id, "Ran new assessment", patient_id)
+
     image_path = os.path.join(UPLOAD_DIR, f"patient_{patient_id}_{ecg_image.filename}")
     with open(image_path, "wb") as f:
         shutil.copyfileobj(ecg_image.file, f)
@@ -351,6 +447,8 @@ def patient_history(patient_id: int, request: Request, db: Session = Depends(get
     if not patient:
         raise HTTPException(status_code=404, detail="Patient not found")
 
+    log_action(db, doctor.id, "Viewed patient history", patient_id)
+
     assessments = (
         db.query(Assessment)
         .filter(Assessment.patient_id == patient_id)
@@ -381,6 +479,8 @@ def download_report(assessment_id: int, request: Request, db: Session = Depends(
     if not patient:
         raise HTTPException(status_code=404, detail="Not found")
 
+    log_action(db, doctor.id, "Downloaded PDF report", assessment.patient_id)
+
     patient_dict = {
         "age": patient.age, "sex": patient.sex, "cp": assessment.cp,
         "trestbps": assessment.trestbps, "chol": assessment.chol, "fbs": assessment.fbs,
@@ -410,3 +510,18 @@ def get_gradcam_image(assessment_id: int, request: Request, db: Session = Depend
     if assessment and assessment.gradcam_image_path and os.path.exists(assessment.gradcam_image_path):
         return FileResponse(assessment.gradcam_image_path, media_type="image/jpeg")
     raise HTTPException(status_code=404, detail="Grad-CAM image not found")
+
+@router.get("/audit-log")
+def audit_log_page(request: Request, db: Session = Depends(get_db)):
+    doctor = get_current_doctor(request, db)
+    if not doctor:
+        return RedirectResponse(url="/ui/login", status_code=303)
+
+    logs = (
+        db.query(AuditLog)
+        .filter(AuditLog.doctor_id == doctor.id)
+        .order_by(AuditLog.timestamp.desc())
+        .limit(50)
+        .all()
+    )
+    return templates.TemplateResponse(request, "audit_log.html", {"logs": logs})    
